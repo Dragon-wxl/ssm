@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis/org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.csuft.wxl.mapper.PersionMap">
+
+	<!-- 一对多返回集合的映射 -->
+	<resultMap type="salary" id="salaryBean">
+		<id column="sid" property="id" />
+		<result column="sdepartment" property="department" />
+		<result column="wage" property="wage" />
+		<collection property="persion" ofType="Persion">
+			<id column="pid" property="id" />
+			<result column="pname" property="name" />
+			<result column="birthday" property="birthday" />
+			<result column="sex" property="sex" />
+			<result column="pdepartment" property="department" />
+		</collection>
+	</resultMap>
+	<!-- 以那个表为主就弄到哪个表中去 以后不要这样子 -->
+	<resultMap type="Persion" id="persionBean">
+		<id column="pid" property="id" />
+		<result column="pname" property="name" />
+		<result column="birthday" property="birthday" />
+		<result column="sex" property="sex" />
+		<result column="pdepartment" property="department" />
+		<association property="salary" javaType="Salary">
+			<id column="sid" property="id" />
+			<result column="sdepartment" property="department" />
+			<result column="wage" property="wage" />
+		</association>
+	</resultMap>
+	<!-- 连接三表 -->
+	<resultMap type="Persion" id="persionWageLevelBean">
+		<id column="pid" property="id" />
+		<result column="pname" property="name" />
+		<result column="birthday" property="birthday" />
+		<result column="sex" property="sex" />
+		<result column="pdepartment" property="department" />
+		<association property="salary" javaType="Salary">
+			<id column="sid" property="id" />
+			<result column="sdepartment" property="department" />
+			<result column="srank" property="rank" />
+			<result column="wage" property="wage" />
+			<association property="level" javaType="Level">
+				<id column="lid" property="id" />
+				<result column="lrank" property="rank" />
+				<result column="define" property="define" />
+			</association>
+		</association>
+	</resultMap>
+	<!-- 插入一条语句 在 persion表中 -->
+	<insert id="insertOnePersion" parameterType="Persion">
+		INSERT INTO
+		`persion` (`id`, `name`, `birthday`, `sex`, `department`) VALUES
+		(#{id}, #{name}, #{birthday}, #{sex}, #{department});
+	</insert>
+	<!-- 删除一条语句在 persion表中 -->
+	<delete id="deleteOnePersion" parameterType="String">
+		delete from persion
+		where id=#{id};
+	</delete>
+	<!-- 选择persion表中的所有数据 -->
+	<select id="selectAll" resultType="Persion">
+		SELECT * FROM persion;
+	</select>
+	<!-- 计数 -->
+	<select id="selectCount" resultType="Integer">
+		SELECT count(*) FROM
+		persion;
+	</select>
+	<!-- 选择persion表中的所有数据当指定id时 -->
+	<select id="selectOne" parameterType="String"
+		resultType="Persion">
+		SELECT * FROM persion where id=#{id};
+	</select>
+	<!-- 对Persion表的模糊查询 -->
+	<select id="selectVagueName" parameterType="String"
+		resultType="Persion">
+		<bind name="likename" value="'%'+name+'%'"></bind>
+		SELECT * FROM persion where name like #{likename};
+	</select>
+	<!-- 使用Map类型进行条件查询 -->
+	<select id="selectNameDepartment" parameterType="Map"
+		resultType="Persion">
+		SELECT * FROM persion where name=#{name} and
+		department=#{department};
+	</select>
+	<select id="selectLimitPersion" parameterType="Map"
+		resultType="Persion">
+		select * from persion limit #{start},#{length};
+	</select>
+	<!-- persion表和salary表的左连接查询，返回数据类型 salary对象 -->
+	<select id="selectPersionWage1" resultMap="salaryBean">
+		select
+		persion.id
+		'pid',
+		persion.name 'pname',
+		persion.birthday,
+		persion.sex,
+		persion.department
+		'pdepartment',
+		salary.id 'sid',
+		salary.department
+		'sdepartment',
+		wage
+		From persion left join salary on
+		persion.department
+		=salary.department;
+	</select>
+	<!-- persion表和salary表的左连接查询，返回数据类型 persion对象 -->
+	<select id="selectPersionWage2" resultMap="persionBean">
+		select
+		persion.id
+		'pid',
+		persion.name 'pname',
+		persion.birthday,
+		persion.sex,
+		persion.department
+		'pdepartment',
+		salary.id 'sid',
+		salary.department
+		'sdepartment',
+		wage
+		From persion left join salary on
+		persion.department
+		=salary.department;
+	</select>
+	<!-- 三表进行查询，左连接，使用 -->
+	<select id="selectPersionWageLevel"
+		resultMap="persionWageLevelBean">
+		select
+		persion.id 'pid',
+		persion.name 'pname',
+		persion.birthday,
+		persion.sex,
+		persion.department
+		'pdepartment',
+		salary.id 'sid',
+		salary.department
+		'sdepartment',
+		salary.wage,
+		salary.rank 'srank',
+		level.id lid,
+		level.rank 'lrank',
+		level.define
+		From
+		persion left
+		join salary on
+		persion.department
+		=salary.department left
+		join level on
+		salary.rank=level.rank
+	</select>
+	<!-- if标签 -->
+	<!-- 使用where标签括起来的if标签,当条件不成立是会自动去除 -->
+	<!-- 当添加where标签时应去除where字段 -->
+	<select id="Ifname" parameterType="Map" resultType="Persion">
+		SELECT * FROM persion Order By id Desc
+		<where>
+			<if test="id!=null">
+				and id like "%"#{id}"%"
+			</if>
+			<if test="name!=null">
+				and name like "%"#{name}"%"
+			</if>
+		</where>
+	</select>
+
+	<update id="updateOnePersion" parameterType="Persion">
+		update persion set
+		name=#{name} where id=#{id} ;
+	</update>
+	<update id="updateOnePersionWhileId" parameterType="Persion">
+		update persion
+		<set>
+			<if test="birthday!=null">birthday=#{birthday}, </if>
+			<if test="department!=null">department=#{department} ,</if>
+			<if test="name!=null">name=#{name},</if>
+			<if test="sex!=null">sex=#{sex}, </if>
+		</set>
+		where id=#{id} ;
+	</update>
+	<select id="selectForeach" resultType="Persion">
+		select * from persion where id
+		in
+		<foreach item="item" index="index" open="(" separator=","
+			close=")" collection="list">
+			#{item}
+		</foreach>
+	</select>
+</mapper>
