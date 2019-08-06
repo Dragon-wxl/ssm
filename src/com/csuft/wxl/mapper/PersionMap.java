@@ -2,11 +2,8 @@ package com.csuft.wxl.mapper;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Mapper;
-
 import com.csuft.wxl.pojo.PageNumber;
 import com.csuft.wxl.pojo.Persion;
-@Mapper
 public interface PersionMap {
 	//查
 	public List<Persion> selectAll();

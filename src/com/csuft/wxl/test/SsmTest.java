@@ -1,7 +1,6 @@
 package com.csuft.wxl.test;
 
 import java.util.List;
-import java.util.Map;
 
 import org .junit.Test;
 import org.junit.runner.RunWith;
@@ -12,12 +11,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.csuft.wxl.pojo.PageNumber;
 import com.csuft.wxl.pojo.Persion;
 import com.csuft.wxl.service.PersionService;
-import com.csuft.wxl.service.impl.PersionServiceimpl;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:applicationContext.xml")
 public class SsmTest {
 	@Autowired
-	PersionServiceimpl persionService;
+	PersionService persionService;
 //	@Test
 //	public void getList() {
 //		List<Persion> list=persionService.getSelect();
